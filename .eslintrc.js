@@ -1,3 +1,11 @@
+/*
+ * @Author: your name
+ * @Date: 2020-11-08 12:46:24
+ * @LastEditTime: 2020-11-11 17:01:52
+ * @LastEditors: Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: \vue-peoject\.eslintrc.js
+ */
 module.exports = {
   root: true,
   env: {
@@ -5,7 +13,7 @@ module.exports = {
   },
   extends: [
     'plugin:vue/essential',
-    '@vue/standard'
+    // '@vue/standard'
   ],
   parserOptions: {
     parser: 'babel-eslint'
