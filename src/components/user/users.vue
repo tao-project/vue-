@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2020-11-12 21:39:44
- * @LastEditTime: 2020-11-17 10:39:18
+ * @LastEditTime: 2020-11-21 11:40:22
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \vue-peoject\src\components\user\users.vue
@@ -31,19 +31,31 @@
         >
       </el-col>
     </el-row>
-    <!-- 添加对话框 -->
-    <el-dialog title="添加用户" :visible.sync="dialogVisible" width="30%">
-      <!-- 这尼玛添加用户表格 -->
-      <el-form>
-        <el-form-item label="活动名称">
-          <el-input></el-input>
+    <!-- 这是添加用户对话框 -->
+    <el-dialog title="添加用户" :visible.sync="dialogVisible" width="600px">
+      <!-- 这尼玛是添加用户表单 -->
+      <el-form
+        label-width="80px"
+        :model="addUserData"
+        :rules="addUserRules"
+        ref="addUserRef"
+      >
+        <el-form-item label="用户名" prop="username">
+          <el-input v-model="addUserData.username"></el-input>
+        </el-form-item>
+        <el-form-item label="密码" prop="password">
+          <el-input v-model="addUserData.password" type="password"></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱" prop="email">
+          <el-input v-model="addUserData.email"></el-input>
+        </el-form-item>
+        <el-form-item label="手机号" prop="mobile">
+          <el-input v-model="addUserData.mobile"></el-input>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogVisible = false"
-          >确 定</el-button
-        >
+        <el-button type="primary" @click="addUser(addUserRef)">确 定</el-button>
       </span>
     </el-dialog>
     <!-- 表格卡片 -->
@@ -99,9 +111,27 @@ export default {
     this.initUser();
   },
   data() {
+    //自定义邮箱验证规则
+    var checkEmail = (rule, value, callback) => {
+      const regEmail = /^\w+@\w+(\.\w+)+$/;
+      if (regEmail.test(value)) {
+        // 合法邮箱
+        return callback();
+      }
+      callback(new Error("请输入合法邮箱"));
+    };
+    // 自定义手机号规则
+    var checkMobile = (rule, value, callback) => {
+      const regMobile = /^1[34578]\d{9}$/;
+      if (regMobile.test(value)) {
+        return callback();
+      }
+      // 返回一个错误提示
+      callback(new Error("请输入合法的手机号码"));
+    };
     return {
       userData: [], //用户数据
-      // 请求参数
+      // 分页功能-->请求参数
       queryInfor: {
         query: "", //查询参数
         pagenum: 1, //当前页码
@@ -109,7 +139,33 @@ export default {
       },
       totalpage: 0, //总记录条数
       inputData: "", //搜索栏input用的数据
-      dialogVisible: false, //设置对话框状态
+      dialogVisible: false, //设置添加对话框状态->是否显示
+      // 添加用户-->请求参数
+      addUserData: {
+        username: "",
+        password: "",
+        email: "",
+        mobile: "",
+      },
+      // 添加用户表单-->验证规则
+      addUserRules: {
+        username: [
+          { required: true, message: "请输入用户名", trigger: "blur" },
+          { min: 6, max: 8, message: "用户名长度在6~8之间", trigger: "blur" },
+        ],
+        password: [
+          { required: true, message: "", trigger: "blur" },
+          { min: 6, max: 8, message: "用户名长度在6~8之间", trigger: "blur" },
+        ],
+        email: [
+          { required: true, message: "邮箱", trigger: "blur" },
+          { validator: checkEmail, trigger: "blur" },
+        ],
+        mobile: [
+          { required: true, message: "手机号", trigger: "blur" },
+          { validator: checkMobile, trigger: "blur" },
+        ],
+      },
     };
   },
   methods: {
@@ -128,7 +184,7 @@ export default {
       this.userData = result.data.users;
       this.totalpage = result.data.total;
     },
-    // 改变用户状态 注：错误还未修改
+    // 改变用户状态 注：错误还未修改  11.21用户状态修改完成
     switchChange: async function (userInfo) {
       const { data: result } = await this.$http.put(
         `users/${userInfo.id}/state/${userInfo.mg_state}`
@@ -149,6 +205,16 @@ export default {
       this.initUser();
     },
     //添加用户函数
+    addUser: function (addUserRef) {
+      this.$refs.addUserRef.validate(async (valid) => {
+        if (valid) {
+          this.$message.success("表单验证成功");
+        } else {
+          return false;
+        }
+        this.dialogVisible = false;
+      });
+    },
     // 修改用户
     modifyUser: function () {},
     // 删除用户
