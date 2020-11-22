@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2020-11-12 21:39:44
- * @LastEditTime: 2020-11-21 11:40:22
+ * @LastEditTime: 2020-11-22 10:55:38
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \vue-peoject\src\components\user\users.vue
@@ -43,7 +43,7 @@
         <el-form-item label="用户名" prop="username">
           <el-input v-model="addUserData.username"></el-input>
         </el-form-item>
-        <el-form-item label="密码" prop="password">
+        <el-form-item label="密码呀" prop="password">
           <el-input v-model="addUserData.password" type="password"></el-input>
         </el-form-item>
         <el-form-item label="邮箱" prop="email">
