@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2020-11-12 21:39:44
- * @LastEditTime: 2020-11-22 10:55:38
+ * @LastEditTime: 2020-11-22 18:08:55
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \vue-peoject\src\components\user\users.vue
@@ -55,7 +55,7 @@
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="addUser(addUserRef)">确 定</el-button>
+        <el-button type="primary" @click="addUser()">确 定</el-button>
       </span>
     </el-dialog>
     <!-- 表格卡片 -->
@@ -84,8 +84,20 @@
           </template>
         </el-table-column>
         <el-table-column label="操作">
-          <i class="iconfont icon-bianji" @click="modifyUser"></i>
-          <i class="iconfont icon-delete" @click="deleteUser"></i>
+          <template slot-scope="scope">
+            <i class="iconfont icon-bianji" @click="modifyUser"></i>
+            <!-- 删除用户 -->
+            <el-tooltip
+              effect="dark"
+              content="点击删除用户"
+              placement="right-start"
+            >
+              <i
+                class="iconfont icon-delete"
+                @click="deleteUser(scope.row)"
+              ></i>
+            </el-tooltip>
+          </template>
         </el-table-column>
       </el-table>
       <!-- 添加分页功能 -->
@@ -154,15 +166,15 @@ export default {
           { min: 6, max: 8, message: "用户名长度在6~8之间", trigger: "blur" },
         ],
         password: [
-          { required: true, message: "", trigger: "blur" },
-          { min: 6, max: 8, message: "用户名长度在6~8之间", trigger: "blur" },
+          { required: true, message: "请输入密码", trigger: "blur" },
+          { min: 6, max: 8, message: "密码长度在6~8之间", trigger: "blur" },
         ],
         email: [
-          { required: true, message: "邮箱", trigger: "blur" },
+          { required: true, message: "请输入邮箱", trigger: "blur" },
           { validator: checkEmail, trigger: "blur" },
         ],
         mobile: [
-          { required: true, message: "手机号", trigger: "blur" },
+          { required: true, message: "请输入手机号", trigger: "blur" },
           { validator: checkMobile, trigger: "blur" },
         ],
       },
@@ -205,20 +217,35 @@ export default {
       this.initUser();
     },
     //添加用户函数
-    addUser: function (addUserRef) {
+    addUser: function () {
       this.$refs.addUserRef.validate(async (valid) => {
         if (valid) {
-          this.$message.success("表单验证成功");
+          const { data: result } = await this.$http.post(
+            "users",
+            this.addUserData
+          );
+          console.log(result);
+          if (result.meta.status !== 201) this.$message.error(result.meta.msg);
+          else {
+            this.$message.success("用户添加成功");
+            this.dialogVisible = false;
+          }
         } else {
           return false;
         }
-        this.dialogVisible = false;
       });
     },
     // 修改用户
     modifyUser: function () {},
     // 删除用户
-    deleteUser: function () {},
+    deleteUser: async function (userInfor) {
+      const { data: result } = await this.$http.delete(`users/${userInfor.id}`);
+      console.log(result);
+      if (result.meta.status == 200) {
+        this.$message.success(result.meta.msg);
+        this.initUser();
+      }
+    },
     // 每页展示条数
     handleSizeChange(newPageSize) {
       this.queryInfor.pagesize = newPageSize;
@@ -243,6 +270,7 @@ export default {
 }
 .iconfont {
   font-size: 25px;
+  cursor: pointer;
 }
 .icon-delete {
   margin-left: 10px;
