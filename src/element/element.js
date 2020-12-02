@@ -131,8 +131,8 @@ import {
   Vue.use(Header);
   Vue.use(Aside);
   Vue.use(Main);
-  Vue.use(Footer);
+Vue.use(Footer);
   
   Vue.use(Loading.directive);
-  
+  Vue.prototype.$confirm = MessageBox.confirm;
   Vue.prototype.$message = Message;

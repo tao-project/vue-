@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2020-11-12 21:39:44
- * @LastEditTime: 2020-11-22 18:08:55
+ * @LastEditTime: 2020-11-25 22:53:11
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \vue-peoject\src\components\user\users.vue
@@ -32,7 +32,12 @@
       </el-col>
     </el-row>
     <!-- 这是添加用户对话框 -->
-    <el-dialog title="添加用户" :visible.sync="dialogVisible" width="600px">
+    <el-dialog
+      slot="title"
+      :visible.sync="dialogVisible"
+      @open="handle()"
+      width="600px"
+    >
       <!-- 这尼玛是添加用户表单 -->
       <el-form
         label-width="80px"
@@ -181,6 +186,9 @@ export default {
     };
   },
   methods: {
+    handle: function () {
+      console.log(111);
+    },
     indexMethod: function (index) {
       return (
         index + 1 + (this.queryInfor.pagenum - 1) * this.queryInfor.pagesize
@@ -216,6 +224,7 @@ export default {
       this.queryInfor.query = this.inputData;
       this.initUser();
     },
+
     //添加用户函数
     addUser: function () {
       this.$refs.addUserRef.validate(async (valid) => {
@@ -229,6 +238,7 @@ export default {
           else {
             this.$message.success("用户添加成功");
             this.dialogVisible = false;
+            this.initUser();
           }
         } else {
           return false;
@@ -236,15 +246,32 @@ export default {
       });
     },
     // 修改用户
-    modifyUser: function () {},
+    modifyUser: function () {
+      this.dialogVisible = true;
+    },
     // 删除用户
     deleteUser: async function (userInfor) {
-      const { data: result } = await this.$http.delete(`users/${userInfor.id}`);
-      console.log(result);
-      if (result.meta.status == 200) {
-        this.$message.success(result.meta.msg);
-        this.initUser();
-      }
+      this.$confirm("是否永久删除用户?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(async () => {
+          const { data: result } = await this.$http.delete(
+            `users/${userInfor.id}`
+          );
+          console.log(result);
+          if (result.meta.status == 200) {
+            this.$message.success(result.meta.msg);
+            this.initUser();
+          }
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "取消删除",
+          });
+        });
     },
     // 每页展示条数
     handleSizeChange(newPageSize) {
